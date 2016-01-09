@@ -22,8 +22,8 @@ pj acpi
 
 pj also comes with the magic feature of autocompletion! 
 
-Instalation
------------
+Installation
+------------
 This utility runs in the bash environment.
 You must have sudo access to install (for auto-completion)
 
