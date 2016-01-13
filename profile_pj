@@ -17,7 +17,7 @@ function pj() {
 }
 
 function sp() {
-  if [ -n $1 ]; then
+  if [ -z $1 ]; then
    echo "Usage $0 command"
    return 1
   fi
