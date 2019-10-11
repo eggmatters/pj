@@ -1,7 +1,10 @@
 #PJ_V0_1
+BASE=/etc/bash_completion.d/pj
+BASH_COMPLETION=$([[ "$(uname)" == 'Darwin' ]] && echo "$(brew --prefix)$BASE" || echo "$BASE")
+
 function pj() {
   CMD=$1
-  DIR=$(cat $HOME/.projects | awk -vcmd="$CMD" '{if ($1 == cmd) { print $2; exit} }')
+  DIR=$(< "$HOME"/.projects awk -v cmd="$CMD" '{if ($1 == cmd) { print $2; exit} }')
   if [[ -n $2 ]]; then
     echo -n "$DIR"
     return 1;
@@ -9,41 +12,41 @@ function pj() {
 
   if [[ -d $DIR ]]; then
     echo "Navigating to $DIR"
-    cd $DIR
+    cd "$DIR" || return 1
   else 
     echo "Cant't find $CMD"
-    cat $HOME/.projects | awk '{print $1}'
+    < "$HOME"/.projects awk '{print $1}'
   fi  
 }
 
 function sp() {
-  if [ -z $1 ]; then
+  if [ -z "$1" ]; then
    echo "Usage $0 command"
    return 1
   fi
 
   if [[ ! -e "$HOME/.projects" ]]; then
-    touch $HOME/.projects
+    touch "$HOME"/.projects
   fi
 
-  TEST=$(egrep -c "^${1}" $HOME/.projects)
+  TEST=$(grep -c "^${1}" "$HOME"/.projects)
 
   if [[ "$TEST" -gt 0 ]]; then
     echo "command already taken"
     exit 0
   else
     echo -e "Writing $1\t$(pwd) to commands file"
-    echo -e "$1\t$(pwd)" >> $HOME/.projects
+    echo -e "$1\t$(pwd)" >> "$HOME"/.projects
   fi
 
-  sudo cp /etc/bash_completion.d/pj /tmp/pj
+  sudo cp "$BASH_COMPLETION" /tmp/pj
 
-  LIST=$(cat $HOME/.projects | awk '{print $1 " "}' | xargs)
+  LIST=$(< "$HOME"/.projects awk '{print $1 " "}' | xargs)
 
-  sudo chown $(whoami):$(whoami) /tmp/pj
-  cat /tmp/pj | sed -e "s/\(opts=\"\).*\(\"\)/\1${LIST}\2/" > /tmp/pj.newr
+  sudo chown $(whoami) /tmp/pj
+  < /tmp/pj sed -e "s/\(opts=\"\).*\(\"\)/\1${LIST}\2/" > /tmp/pj.newr
 
-  sudo mv /tmp/pj.newr /etc/bash_completion.d/pj
-  source /etc/bash_completion
+  sudo mv /tmp/pj.newr "$BASH_COMPLETION"
+  source "$BASH_COMPLETION"
 }
 #ENDPJ

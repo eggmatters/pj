@@ -1,13 +1,13 @@
 #!/bin/bash
 VERSION="V0_1"
 PWD=$(pwd);
-PROFILE=$HOME/.profile_pj
-#BASHRC=$PWD/bashrcbak
-BASHRC=$HOME/.bashrc
+PROFILE="$HOME"/.profile_pj
+BASHRC="$HOME"/.bashrc
+BASH_COMPLETION=/etc/bash_completion.d/
 
 function check_install(){
   echo "Checking for previous installation:"
-  if [ -f $PROFILE ]; then
+  if [ -f "$PROFILE" ]; then
     echo "previous installation exists. Overwrite?"
     dialog
     if [[ $ANSWER == 0 ]]; then
@@ -15,15 +15,25 @@ function check_install(){
       exit 0
     fi
   fi
+  if [[ "$(uname)" == 'Darwin' ]]; then
+    echo "Mac OSX Darwin installation:"
+    echo "Checking for bash_completion:"
+    if [[ ! -e "$(brew --prefix)$BASH_COMPLETION" ]]; then
+      echo "You're bash completion install does not exist"
+      echo "Please run $ brew install bash-completion"
+      exit 1
+    fi
+    BASH_COMPLETION="$(brew --prefix)$BASH_COMPLETION"
+  fi
 }
 
 function install_pj(){
   echo "Installing pj"
-  cp $PWD/profile_pj $PROFILE
-  if ! grep -e "\. ~\/\.profile_pj" $BASHRC 1> /dev/null; then
-    cat $PWD/bashrc >> $BASHRC
+  cp "$PWD"/profile_pj "$PROFILE"
+  if ! grep -e "\. ~\/\.profile_pj" "$BASHRC" 1> /dev/null; then
+    cat "$PWD"/bashrc >> "$BASHRC"
   fi
-  sudo cp $PWD/etc/bash_completion.d/pj /etc/bash_completion.d/  
+  sudo cp "$PWD"/etc/bash_completion.d/pj "$BASH_COMPLETION"
 }
 
 function dialog() {
